@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/public/Home';
+import LinkPage from './pages/public/LinkPage';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import { useAuth } from './store/authStore.jsx';
@@ -33,6 +34,9 @@ export default function App() {
 
         {/* Protected */}
         <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+        {/* Public link details */}
+        <Route path="/link/:id" element={<LinkPage />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -28,6 +28,11 @@ const linkSchema = new mongoose.Schema(
       default: 0
     },
     actions: { type: [actionSchema], default: [] },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true
+    },
   },
   {
     timestamps: true

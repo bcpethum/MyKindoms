@@ -202,7 +202,7 @@ function LinkRow({ link, onEdit, onDelete, onToggle, onCopy }) {
           <input type="checkbox" checked={link.active} onChange={() => onToggle(link)} />
           <span className="toggle-track" />
         </label>
-        <button className="icon-btn" onClick={() => onCopy(link.url)} title="Copy URL">
+        <button className="icon-btn" onClick={() => onCopy(`${window.location.origin}/link/${link._id}`)} title="Copy Page URL">
           <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
             <path d={ICONS.copy} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -309,16 +309,23 @@ export default function Dashboard() {
 
     setSaving(true);
     try {
+      let linkId = '';
       if (editingLink) {
-        await api.put(`/links/${editingLink._id}`, payload);
+        const res = await api.put(`/links/${editingLink._id}`, payload);
+        linkId = res.data?.link?._id || editingLink._id;
         showToast('Link updated!');
       } else {
-        await api.post('/links', payload);
+        const res = await api.post('/links', payload);
+        linkId = res.data?.link?._id;
         showToast('Link created!');
       }
       resetForm();
-      setLinksTab('overview');
-      fetchLinks();
+      if (linkId) {
+        navigate(`/link/${linkId}`);
+      } else {
+        setLinksTab('overview');
+        fetchLinks();
+      }
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to save link', 'error');
     } finally {
@@ -660,7 +667,7 @@ export default function Dashboard() {
                         <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
                           <path d="M13 8V6a4 4 0 00-8 0v2M5 8h8a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V9a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        {editingLink ? 'Update Link' : 'Unlock link'}
+                        Unlock link
                       </button>
                     </div>
                   </>

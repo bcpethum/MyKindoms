@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   getLinks,
+  getLinkById,
   createLink,
   updateLink,
   deleteLink,
@@ -12,7 +13,8 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getLinks);
+router.get("/", protect, getLinks);
+router.get("/:id", getLinkById);
 
 router.post(
   "/",
