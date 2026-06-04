@@ -1,0 +1,40 @@
+import mongoose from "mongoose";
+
+const actionSchema = new mongoose.Schema(
+  {
+    type: { type: String, required: true },   // e.g. 'visit_page', 'youtube_subscribe'
+    label: { type: String, default: "" },
+    url: { type: String, default: "" },
+    icon: { type: String, default: "" },
+    color: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
+const linkSchema = new mongoose.Schema(
+  {
+    title: String,
+    url: String,
+    clicks: {
+      type: Number,
+      default: 0
+    },
+    active: {
+      type: Boolean,
+      default: true
+    },
+    order: {
+      type: Number,
+      default: 0
+    },
+    actions: { type: [actionSchema], default: [] },
+  },
+  {
+    timestamps: true
+  }
+);
+
+export default mongoose.model(
+  "Link",
+  linkSchema
+);
