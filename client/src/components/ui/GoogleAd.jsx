@@ -49,44 +49,11 @@ export default function GoogleAd({
     }
   }, [adClient, adSlot]);
 
-  // If slot is not configured, show a placeholder matching the MyKingdoms theme
+  // If slot is not configured, do not show any placeholder
   if (!adSlot) {
-    return (
-      <div style={{
-        width: '100%',
-        background: 'rgba(255, 255, 255, 0.02)',
-        border: '1px dashed rgba(168, 85, 247, 0.4)',
-        borderRadius: '16px',
-        padding: '20px',
-        textAlign: 'center',
-        margin: '15px 0',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '8px',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          fontSize: '0.75rem',
-          fontWeight: 700,
-          color: '#a855f7',
-          textTransform: 'uppercase',
-          letterSpacing: '1.5px',
-          background: 'rgba(168, 85, 247, 0.1)',
-          padding: '4px 10px',
-          borderRadius: '20px'
-        }}>
-          Sponsored Ad (Client: {adClient})
-        </div>
-        <div style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: 500 }}>
-          Google AdSense unit will render here.
-        </div>
-        <div style={{ fontSize: '0.75rem', color: '#475569', fontFamily: 'monospace' }}>
-          Please define VITE_GOOGLE_ADSENSE_SLOT in your .env file to activate.
-        </div>
-      </div>
-    );
+    return null;
   }
+
 
   return (
     <div className="google-ad-wrap" style={{ margin: '15px auto', width: '100%', minHeight: '90px', overflow: 'hidden' }}>
