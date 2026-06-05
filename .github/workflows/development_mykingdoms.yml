@@ -28,13 +28,6 @@ jobs:
         working-directory: ./server
         run: npm install
 
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: ./server
-
       - name: Install Frontend Dependencies
         working-directory: ./client
         run: npm install
