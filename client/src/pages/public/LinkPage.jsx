@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
+import GoogleAd from '../../components/ui/GoogleAd';
 
 /* ─── Share Modal ─────────────────────────────── */
 const SHARE_PLATFORMS = [
   {
     id: 'copy', label: 'Copy Link', icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ), bg: '#374151', action: 'copy',
   },
@@ -60,7 +61,7 @@ function ShareModal({ url, title, onClose }) {
               <div className="lp-share-icon" style={{ background: p.id === 'copy' && copied ? '#10b981' : p.bg }}>
                 {p.id === 'copy'
                   ? (copied
-                    ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     : p.icon)
                   : <span className="lp-share-emoji">{p.icon}</span>
                 }
@@ -131,7 +132,7 @@ export default function LinkPage() {
       window.open(action.url, '_blank', 'noopener,noreferrer');
     }
     // Track click on the main link
-    await api.post(`/links/click/${id}`).catch(() => {});
+    await api.post(`/links/click/${id}`).catch(() => { });
 
     // Start 10s countdown
     let secondsLeft = 10;
@@ -213,12 +214,12 @@ export default function LinkPage() {
       <div className="lp-topbar">
         <Link to="/" className="lp-logo">
           <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-            <path d="M16 2L28 8V16C28 22.627 22.627 28 16 28C9.373 28 4 22.627 4 16V8L16 2Z" fill="url(#lpg)"/>
-            <path d="M11 12L16 8L21 12V20H11V12Z" fill="rgba(255,255,255,0.9)"/>
-            <circle cx="16" cy="16" r="2.5" fill="url(#lpg)"/>
+            <path d="M16 2L28 8V16C28 22.627 22.627 28 16 28C9.373 28 4 22.627 4 16V8L16 2Z" fill="url(#lpg)" />
+            <path d="M11 12L16 8L21 12V20H11V12Z" fill="rgba(255,255,255,0.9)" />
+            <circle cx="16" cy="16" r="2.5" fill="url(#lpg)" />
             <defs>
               <linearGradient id="lpg" x1="4" y1="2" x2="28" y2="28">
-                <stop stopColor="#a855f7"/><stop offset="1" stopColor="#f59e0b"/>
+                <stop stopColor="#a855f7" /><stop offset="1" stopColor="#f59e0b" />
               </linearGradient>
             </defs>
           </svg>
@@ -229,17 +230,18 @@ export default function LinkPage() {
 
       {/* Main card */}
       <div className="lp-card-wrap">
+        <GoogleAd />
         <div className="lp-card">
           {/* Link title */}
           <h1 className="lp-card-title">{link.title}</h1>
           <p className="lp-card-sub">
             {unlocked
               ? (link.linkType === 'snippet' ? '📋 Snippet unlocked! Scroll down to see it.' :
-                 link.linkType === 'file' ? '🎉 File unlocked! Click below to download.' :
-                 '🎉 Link unlocked! Click below to visit.')
+                link.linkType === 'file' ? '🎉 File unlocked! Click below to download.' :
+                  '🎉 Link unlocked! Click below to visit.')
               : (link.linkType === 'file' ? 'Complete the actions to download the file' :
-                 link.linkType === 'snippet' ? 'Complete the actions to reveal the snippet' :
-                 'Complete the actions to unlock')}
+                link.linkType === 'snippet' ? 'Complete the actions to reveal the snippet' :
+                  'Complete the actions to unlock')}
           </p>
 
           {/* Action buttons */}
@@ -260,7 +262,7 @@ export default function LinkPage() {
                     {done ? (
                       <>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                          <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         Done!
                       </>
@@ -320,8 +322,8 @@ export default function LinkPage() {
                   download
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2v14M8 12l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M12 2v14M8 12l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                   Download File →
                 </a>
@@ -336,16 +338,16 @@ export default function LinkPage() {
                 {unlocked ? (
                   <>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+                      <path d="M7 11V7a5 5 0 0110 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                     Visit Link →
                   </>
                 ) : (
                   <>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+                      <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                     {lt === 'file' ? 'Unlock to download' : lt === 'snippet' ? 'Unlock to reveal' : 'Unlock link'}
                   </>
@@ -359,10 +361,10 @@ export default function LinkPage() {
         <div className="lp-share-card">
           <button className="lp-share-card-btn" onClick={() => setShowShare(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="2"/>
-              <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-              <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="2"/>
-              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="2" />
+              <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+              <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="2" />
+              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
             Share this link
           </button>
