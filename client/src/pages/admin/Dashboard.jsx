@@ -237,6 +237,8 @@ export default function Dashboard() {
   const [linksLoading, setLinksLoading] = useState(true);
 
   const [form, setForm] = useState({ title: '', url: '' });
+  const [linkType, setLinkType] = useState('url'); // 'url' | 'file' | 'snippet'
+  const [snippetContent, setSnippetContent] = useState('');
   const [editingLink, setEditingLink] = useState(null);
   const [actions, setActions] = useState([]);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -282,22 +284,31 @@ export default function Dashboard() {
 
   const resetForm = () => {
     setForm({ title: '', url: '' });
+    setLinkType('url');
+    setSnippetContent('');
     setEditingLink(null);
     setActions([]);
   };
 
   /* ── Create / Update ── */
   const handleSave = async (e) => {
-    e.preventDefault();
-    if (!form.url.trim() || !form.title.trim()) return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (!form.title.trim()) return;
+    if (linkType === 'url' && !form.url.trim()) return;
+    if (linkType === 'file' && !form.url.trim()) return;
+    if (linkType === 'snippet' && !snippetContent.trim()) return;
 
-    // Auto-add https://
+    // Auto-add https:// for URL and File types
     let url = form.url.trim();
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if ((linkType === 'url' || linkType === 'file') && url && !/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
 
     const payload = {
-      ...form,
-      url,
+      title: form.title.trim(),
+      linkType,
+      url: linkType === 'snippet' ? '' : url,
+      content: linkType === 'snippet' ? snippetContent.trim() : '',
       actions: actions.map(a => ({
         type: a.type,
         label: a.label,
@@ -359,6 +370,8 @@ export default function Dashboard() {
   const handleEdit = (link) => {
     setEditingLink(link);
     setForm({ title: link.title || '', url: link.url || '' });
+    setLinkType(link.linkType || 'url');
+    setSnippetContent(link.content || '');
     setActions((link.actions || []).map(a => ({ ...a, actionUrl: a.url })));
     setLinksTab('create');
     setTimeout(() => formRef.current?.querySelector('input')?.focus(), 100);
@@ -476,20 +489,20 @@ export default function Dashboard() {
               <form onSubmit={handleSave} className="create-form">
                 {/* URL type selector */}
                 <div className="type-tabs">
-                  <button type="button" className="type-tab active">
+                  <button type="button" className={`type-tab ${linkType === 'url' ? 'active' : ''}`} onClick={() => setLinkType('url')}>
                     <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
                       <path d={ICONS.linkChain} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     URL
                   </button>
-                  <button type="button" className="type-tab">
+                  <button type="button" className={`type-tab ${linkType === 'file' ? 'active' : ''}`} onClick={() => setLinkType('file')}>
                     <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
                       <path d="M3 4h12v10H3z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="M7 8h4M7 11h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
                     File
                   </button>
-                  <button type="button" className="type-tab">
+                  <button type="button" className={`type-tab ${linkType === 'snippet' ? 'active' : ''}`} onClick={() => setLinkType('snippet')}>
                     <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
                       <path d="M3 3h12v12H3zM7 7h4M7 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
@@ -497,24 +510,62 @@ export default function Dashboard() {
                   </button>
                 </div>
 
-                {/* Fields */}
-                <div className="cf-group">
-                  <label className="cf-label">
-                    <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-                      <path d={ICONS.linkChain} stroke="#a855f7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Destination URL <span>*</span>
-                  </label>
-                  <input
-                    className="cf-input"
-                    type="text"
-                    placeholder="https://example.com"
-                    value={form.url}
-                    onChange={setField('url')}
-                    required
-                    id="create-url-input"
-                  />
-                </div>
+                {/* Fields — change based on linkType */}
+                {(linkType === 'url' || linkType === 'file') && (
+                  <div className="cf-group">
+                    <label className="cf-label">
+                      {linkType === 'file' ? (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                            <path d="M3 4h12v10H3z" stroke="#a855f7" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M7 8h4M7 11h2" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round"/>
+                          </svg>
+                          File URL <span>*</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                            <path d={ICONS.linkChain} stroke="#a855f7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          Destination URL <span>*</span>
+                        </>
+                      )}
+                    </label>
+                    <input
+                      className="cf-input"
+                      type="text"
+                      placeholder={linkType === 'file' ? 'https://example.com/myfile.pdf' : 'https://example.com'}
+                      value={form.url}
+                      onChange={setField('url')}
+                      required
+                      id="create-url-input"
+                    />
+                    {linkType === 'file' && (
+                      <p className="cf-hint">Visitors will be prompted to download this file after completing actions.</p>
+                    )}
+                  </div>
+                )}
+
+                {linkType === 'snippet' && (
+                  <div className="cf-group">
+                    <label className="cf-label">
+                      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                        <path d="M3 3h12v12H3zM7 7h4M7 10h4" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      Snippet Content <span>*</span>
+                    </label>
+                    <textarea
+                      className="cf-textarea"
+                      placeholder="Paste your code, coupon, password, or any text here..."
+                      value={snippetContent}
+                      onChange={e => setSnippetContent(e.target.value)}
+                      required
+                      rows={6}
+                      id="create-snippet-input"
+                    />
+                    <p className="cf-hint">This content will be revealed to visitors after they complete all actions.</p>
+                  </div>
+                )}
 
                 <div className="cf-group">
                   <label className="cf-label">
@@ -590,7 +641,13 @@ export default function Dashboard() {
                   <button type="button" className="dash-btn dash-btn--ghost" onClick={() => { resetForm(); setLinksTab('overview'); }}>
                     Cancel
                   </button>
-                  <button type="submit" className="dash-btn dash-btn--primary" disabled={saving} id="create-save-btn">
+                  <button
+                    type="button"
+                    className="dash-btn dash-btn--primary"
+                    disabled={saving || !form.title.trim() || (linkType !== 'snippet' && !form.url.trim()) || (linkType === 'snippet' && !snippetContent.trim())}
+                    onClick={handleSave}
+                    id="create-save-btn"
+                  >
                     {saving ? <span className="dash-spinner dash-spinner--sm" /> : null}
                     {saving ? 'Saving…' : (editingLink ? 'Update Link' : 'Create Link')}
                   </button>
@@ -612,7 +669,7 @@ export default function Dashboard() {
                 <span>PREVIEW</span>
                 <button
                   className="dash-btn dash-btn--primary dash-btn--sm"
-                  disabled={saving || !form.url || !form.title}
+                  disabled={saving || !form.title.trim() || (linkType !== 'snippet' && !form.url.trim()) || (linkType === 'snippet' && !snippetContent.trim())}
                   onClick={handleSave}
                   id="preview-create-btn"
                 >
@@ -624,13 +681,36 @@ export default function Dashboard() {
               </div>
 
               <div className="preview-card">
-                {form.url || form.title ? (
+                {(form.title || (linkType !== 'snippet' ? form.url : snippetContent)) ? (
                   <>
                     {/* Link header */}
                     <div className="preview-link-header">
                       <h4 className="preview-link-title-lg">{form.title || 'Your Link'}</h4>
-                      <p className="preview-link-sub">Complete the actions to unlock</p>
+                      <p className="preview-link-sub">
+                        {linkType === 'file' ? 'Complete actions to download the file' :
+                         linkType === 'snippet' ? 'Complete actions to reveal the snippet' :
+                         'Complete the actions to unlock'}
+                      </p>
                     </div>
+
+                    {/* Snippet preview blurred content */}
+                    {linkType === 'snippet' && snippetContent && (
+                      <div className="preview-snippet-blur">
+                        <pre>{snippetContent.slice(0, 80)}{snippetContent.length > 80 ? '…' : ''}</pre>
+                        <div className="preview-snippet-lock">🔒 Locked</div>
+                      </div>
+                    )}
+
+                    {/* File preview */}
+                    {linkType === 'file' && form.url && (
+                      <div className="preview-file-info">
+                        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                          <path d="M3 4h12v10H3z" stroke="#a855f7" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M7 8h4M7 11h2" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                        <span>{form.url.split('/').pop() || 'file'}</span>
+                      </div>
+                    )}
 
                     {/* Action buttons preview */}
                     {actions.length > 0 && (
@@ -660,20 +740,38 @@ export default function Dashboard() {
                         <div className="preview-progress__bar" style={{ width: '0%' }} />
                       </div>
                       <button
-                        className={`preview-unlock-btn ${form.title && form.url ? 'preview-unlock-btn--ready' : ''}`}
+                        className={`preview-unlock-btn ${(form.title && (linkType === 'snippet' ? snippetContent : form.url)) ? 'preview-unlock-btn--ready' : ''}`}
                         onClick={handleSave}
-                        disabled={!form.title || !form.url || saving}
+                        disabled={!form.title || (linkType === 'snippet' ? !snippetContent : !form.url) || saving}
                       >
-                        <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-                          <path d="M13 8V6a4 4 0 00-8 0v2M5 8h8a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V9a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Unlock link
+                        {linkType === 'file' ? (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                              <path d="M9 2v10M5 8l4 4 4-4M3 14h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Download file
+                          </>
+                        ) : linkType === 'snippet' ? (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                              <path d="M3 3h12v12H3zM7 7h4M7 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                            Reveal snippet
+                          </>
+                        ) : (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                              <path d="M13 8V6a4 4 0 00-8 0v2M5 8h8a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V9a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Unlock link
+                          </>
+                        )}
                       </button>
                     </div>
                   </>
                 ) : (
                   <div className="preview-empty">
-                    <div className="preview-empty-icon">🔗</div>
+                    <div className="preview-empty-icon">{linkType === 'file' ? '📁' : linkType === 'snippet' ? '📋' : '🔗'}</div>
                     <p>Fill in the form to see a preview</p>
                   </div>
                 )}
@@ -1298,6 +1396,19 @@ export default function Dashboard() {
         }
         .cf-input::placeholder { color: #334155; }
         .cf-input:focus { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.05); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+        .cf-input--sm { padding: 8px 12px; font-size: 0.875rem; }
+        .cf-textarea {
+          width: 100%; padding: 12px 16px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px; color: #f8fafc;
+          font-size: 0.875rem; font-family: 'Inter', monospace;
+          outline: none; transition: all 0.25s ease;
+          resize: vertical; min-height: 120px; line-height: 1.6;
+        }
+        .cf-textarea::placeholder { color: #334155; }
+        .cf-textarea:focus { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.05); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+        .cf-hint { font-size: 0.75rem; color: #475569; font-style: italic; }
 
         /* Advanced */
         .cf-advanced summary { font-size: 0.82rem; color: #64748b; cursor: pointer; user-select: none; transition: color 0.2s ease; list-style: none; display: flex; align-items: center; gap: 6px; }
@@ -1359,6 +1470,33 @@ export default function Dashboard() {
         .preview-empty { text-align: center; padding: 20px; }
         .preview-empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.4; }
         .preview-empty p { font-size: 0.82rem; color: #475569; }
+        .preview-snippet-blur {
+          position: relative; overflow: hidden;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 8px; padding: 12px;
+        }
+        .preview-snippet-blur pre {
+          font-size: 0.75rem; color: #64748b;
+          font-family: monospace; white-space: pre-wrap;
+          filter: blur(4px); user-select: none;
+          line-height: 1.5;
+        }
+        .preview-snippet-lock {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.82rem; font-weight: 700; color: #94a3b8;
+          gap: 6px;
+          background: rgba(5,8,22,0.6);
+        }
+        .preview-file-info {
+          display: flex; align-items: center; gap: 8px;
+          background: rgba(168,85,247,0.08);
+          border: 1px solid rgba(168,85,247,0.2);
+          border-radius: 8px; padding: 10px 14px;
+          font-size: 0.82rem; color: #c4b5fd; font-weight: 500;
+          word-break: break-all;
+        }
 
         /* Kingdom URL card */
         .kingdom-url-card {

@@ -23,7 +23,9 @@ export const createLink = async (req, res) => {
   try {
     const {
       title,
+      linkType,
       url,
+      content,
       icon,
       order,
       actions
@@ -31,7 +33,9 @@ export const createLink = async (req, res) => {
 
     const link = await Link.create({
       title,
-      url,
+      linkType: linkType || 'url',
+      url: url || '',
+      content: content || '',
       icon,
       order,
       actions,

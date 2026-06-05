@@ -93,6 +93,7 @@ export default function LinkPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [activeCountdowns, setActiveCountdowns] = useState({});
+  const [snippetCopied, setSnippetCopied] = useState(false);
   const intervalsRef = useRef({});
 
   const pageUrl = window.location.href;
@@ -161,9 +162,20 @@ export default function LinkPage() {
   };
 
   const handleUnlock = () => {
-    if (unlocked && link?.url) {
-      window.open(link.url, '_blank', 'noopener,noreferrer');
+    const lt = link?.linkType || 'url';
+    if (unlocked) {
+      if (lt === 'url' || lt === 'file') {
+        window.open(link.url, '_blank', 'noopener,noreferrer');
+      }
+      // snippet: content is shown inline, no redirect needed
     }
+  };
+
+  const handleCopySnippet = () => {
+    navigator.clipboard.writeText(link?.content || '').then(() => {
+      setSnippetCopied(true);
+      setTimeout(() => setSnippetCopied(false), 2000);
+    });
   };
 
   const completedCount = Object.keys(completedActions).length;
@@ -221,7 +233,13 @@ export default function LinkPage() {
           {/* Link title */}
           <h1 className="lp-card-title">{link.title}</h1>
           <p className="lp-card-sub">
-            {unlocked ? '🎉 Link unlocked! Click below to visit.' : 'Complete the actions to unlock'}
+            {unlocked
+              ? (link.linkType === 'snippet' ? '📋 Snippet unlocked! Scroll down to see it.' :
+                 link.linkType === 'file' ? '🎉 File unlocked! Click below to download.' :
+                 '🎉 Link unlocked! Click below to visit.')
+              : (link.linkType === 'file' ? 'Complete the actions to download the file' :
+                 link.linkType === 'snippet' ? 'Complete the actions to reveal the snippet' :
+                 'Complete the actions to unlock')}
           </p>
 
           {/* Action buttons */}
@@ -276,30 +294,65 @@ export default function LinkPage() {
             </div>
           )}
 
-          {/* Unlock button */}
-          <button
-            className={`lp-unlock-btn ${unlocked ? 'lp-unlock-btn--active' : ''}`}
-            onClick={handleUnlock}
-            disabled={!unlocked}
-          >
-            {unlocked ? (
-              <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M7 11V7a5 5 0 0110 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                Visit Link →
-              </>
-            ) : (
-              <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                Unlock link
-              </>
-            )}
-          </button>
+          {/* Unlock button / action — depends on link type */}
+          {(() => {
+            const lt = link?.linkType || 'url';
+            if (lt === 'snippet' && unlocked) {
+              return (
+                <div className="lp-snippet-reveal">
+                  <div className="lp-snippet-header">
+                    <span>📋 Snippet revealed!</span>
+                    <button className="lp-snippet-copy-btn" onClick={handleCopySnippet}>
+                      {snippetCopied ? '✓ Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <pre className="lp-snippet-content">{link.content}</pre>
+                </div>
+              );
+            }
+            if (lt === 'file' && unlocked) {
+              return (
+                <a
+                  className="lp-unlock-btn lp-unlock-btn--active lp-download-btn"
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2v14M8 12l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  Download File →
+                </a>
+              );
+            }
+            return (
+              <button
+                className={`lp-unlock-btn ${unlocked ? 'lp-unlock-btn--active' : ''}`}
+                onClick={handleUnlock}
+                disabled={!unlocked}
+              >
+                {unlocked ? (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Visit Link →
+                  </>
+                ) : (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    {lt === 'file' ? 'Unlock to download' : lt === 'snippet' ? 'Unlock to reveal' : 'Unlock link'}
+                  </>
+                )}
+              </button>
+            );
+          })()}
         </div>
 
         {/* Share card below */}
@@ -628,6 +681,45 @@ export default function LinkPage() {
           transition: all 0.2s ease;
         }
         .lp-share-close:hover { background: rgba(255,255,255,0.09); color: #f8fafc; }
+
+        /* Snippet reveal */
+        .lp-snippet-reveal {
+          display: flex; flex-direction: column; gap: 10px;
+          animation: fadeInUp 0.4s ease;
+        }
+        .lp-snippet-header {
+          display: flex; align-items: center; justify-content: space-between;
+          font-size: 0.875rem; font-weight: 700; color: #10b981;
+        }
+        .lp-snippet-copy-btn {
+          padding: 5px 16px;
+          background: rgba(16,185,129,0.15);
+          border: 1px solid rgba(16,185,129,0.3);
+          border-radius: 7px; color: #34d399;
+          font-size: 0.78rem; font-weight: 700;
+          cursor: pointer; font-family: 'Inter', sans-serif;
+          transition: all 0.2s ease;
+        }
+        .lp-snippet-copy-btn:hover { background: rgba(16,185,129,0.25); }
+        .lp-snippet-content {
+          background: rgba(0,0,0,0.5);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px; padding: 16px 20px;
+          font-size: 0.85rem; font-family: 'Courier New', monospace;
+          color: #a5f3fc; white-space: pre-wrap; word-break: break-all;
+          line-height: 1.7; max-height: 260px; overflow-y: auto;
+        }
+
+        /* File download button */
+        .lp-download-btn {
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          text-decoration: none;
+          background: linear-gradient(135deg, #0ea5e9, #06b6d4) !important;
+          border-color: transparent !important; color: #fff !important;
+          box-shadow: 0 8px 28px rgba(6,182,212,0.45) !important;
+          cursor: pointer;
+        }
+        .lp-download-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(6,182,212,0.6) !important; }
 
         @media (max-width: 480px) {
           .lp-card { padding: 24px 20px; }

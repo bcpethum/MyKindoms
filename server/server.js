@@ -14,12 +14,22 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://mykingdoms.tech',
+];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+  // Also add www. version if it doesn't start with www.
+  if (!process.env.FRONTEND_URL.includes('//www.')) {
+    allowedOrigins.push(process.env.FRONTEND_URL.replace('://', '://www.'));
+  }
+}
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://mykingdoms.tech',
-  ],
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());

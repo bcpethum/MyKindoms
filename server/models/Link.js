@@ -14,7 +14,9 @@ const actionSchema = new mongoose.Schema(
 const linkSchema = new mongoose.Schema(
   {
     title: String,
-    url: String,
+    linkType: { type: String, enum: ['url', 'file', 'snippet'], default: 'url' },
+    url: { type: String, default: '' },
+    content: { type: String, default: '' }, // for snippet type
     clicks: {
       type: Number,
       default: 0
