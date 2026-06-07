@@ -36,12 +36,12 @@ export default function Login() {
         {/* Logo */}
         <Link to="/" className="auth-logo">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path d="M16 2L28 8V16C28 22.627 22.627 28 16 28C9.373 28 4 22.627 4 16V8L16 2Z" fill="url(#al)"/>
-            <path d="M11 12L16 8L21 12V20H11V12Z" fill="rgba(255,255,255,0.9)"/>
-            <circle cx="16" cy="16" r="2.5" fill="url(#al)"/>
+            <path d="M16 2L28 8V16C28 22.627 22.627 28 16 28C9.373 28 4 22.627 4 16V8L16 2Z" fill="url(#al)" />
+            <path d="M11 12L16 8L21 12V20H11V12Z" fill="rgba(255,255,255,0.9)" />
+            <circle cx="16" cy="16" r="2.5" fill="url(#al)" />
             <defs>
               <linearGradient id="al" x1="4" y1="2" x2="28" y2="28">
-                <stop stopColor="#a855f7"/><stop offset="1" stopColor="#f59e0b"/>
+                <stop stopColor="#a855f7" /><stop offset="1" stopColor="#f59e0b" />
               </linearGradient>
             </defs>
           </svg>
@@ -75,8 +75,8 @@ export default function Login() {
               <label>Username</label>
               <div className="auth-input-wrap">
                 <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <circle cx="9" cy="6" r="3.5" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M2 16c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="9" cy="6" r="3.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M2 16c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 <input
                   type="text" placeholder="yourkingdom" required
@@ -91,8 +91,8 @@ export default function Login() {
             <label>Email</label>
             <div className="auth-input-wrap">
               <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <rect x="2" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M2 6l7 5 7-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <rect x="2" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M2 6l7 5 7-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               <input
                 type="email" placeholder="king@kingdom.com" required
@@ -106,8 +106,8 @@ export default function Login() {
             <label>Password</label>
             <div className="auth-input-wrap">
               <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <rect x="4" y="8" width="10" height="8" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M6 8V6a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <rect x="4" y="8" width="10" height="8" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M6 8V6a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               <input
                 type={showPass ? 'text' : 'password'}
@@ -117,8 +117,8 @@ export default function Login() {
               />
               <button type="button" className="auth-eye" onClick={() => setShowPass(!showPass)} tabIndex={-1}>
                 {showPass
-                  ? <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1 9s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5"/><line x1="2" y1="2" x2="16" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  : <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1 9s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5"/></svg>
+                  ? <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1 9s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5" /><circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" /><line x1="2" y1="2" x2="16" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                  : <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1 9s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5" /><circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" /></svg>
                 }
               </button>
             </div>
@@ -127,8 +127,8 @@ export default function Login() {
           {error && (
             <div className="auth-error">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7" stroke="#ef4444" strokeWidth="1.5"/>
-                <path d="M8 5v3M8 11h.01" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="8" cy="8" r="7" stroke="#ef4444" strokeWidth="1.5" />
+                <path d="M8 5v3M8 11h.01" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               {error}
             </div>
@@ -141,7 +141,7 @@ export default function Login() {
               <>
                 {mode === 'login' ? 'Sign In to Kingdom' : 'Create My Kingdom'}
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </>
             )}

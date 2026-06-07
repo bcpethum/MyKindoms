@@ -28,9 +28,9 @@ export default function App() {
         <Route path="/" element={<Home />} />
 
         {/* Auth — redirect to dashboard if already logged in */}
-        <Route path="/signin"       element={<GuestRoute><Login /></GuestRoute>} />
-        <Route path="/signup"       element={<GuestRoute><Login /></GuestRoute>} />
-        <Route path="/admin/login"  element={<GuestRoute><Login /></GuestRoute>} />
+        <Route path="/signin" element={<GuestRoute><Login /></GuestRoute>} />
+        <Route path="/signup" element={<GuestRoute><Login /></GuestRoute>} />
+        <Route path="/admin/login" element={<GuestRoute><Login /></GuestRoute>} />
 
         {/* Protected */}
         <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
