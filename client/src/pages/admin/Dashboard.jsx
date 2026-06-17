@@ -223,10 +223,344 @@ function LinkRow({ link, onEdit, onDelete, onToggle, onCopy }) {
 }
 
 /* ════════════════════════════════════════════
+   SETTINGS PANEL (standalone to use local state)
+   ════════════════════════════════════════════ */
+function SettingsPanel({ admin, updateAdmin, showToast, handleLogout }) {
+  const ICONS_S = {
+    settings: 'M9 1a8 8 0 100 16A8 8 0 009 1zm0 2a6 6 0 110 12A6 6 0 009 3zm0 2a1 1 0 00-1 1v3a1 1 0 00.293.707l2 2a1 1 0 001.414-1.414L10 9.586V6a1 1 0 00-1-1z',
+    user: 'M9 9a3 3 0 100-6 3 3 0 000 6zm-7 8a7 7 0 1114 0H2z',
+    lock: 'M13 8V6a4 4 0 00-8 0v2M5 8h8a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V9a1 1 0 011-1z',
+    eye: 'M1 9s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6zm8-2a2 2 0 100 4 2 2 0 000-4z',
+    eyeOff: 'M13.87 13.87A8.001 8.001 0 011.05 9m2.07-3.93A7.97 7.97 0 019 3c5 0 8 6 8 6a14.4 14.4 0 01-1.74 2.65M6.1 6.1A3 3 0 0112 9m0 0a3 3 0 01-4.95 2.28M2 2l14 14',
+    check: 'M4 9l4 4 6-7',
+    logout: 'M11 3H6a2 2 0 00-2 2v8a2 2 0 002 2h5M14 9H7m0 0l3-3m-3 3l3 3',
+  };
+
+  /* ── Username form state ── */
+  const [usernameVal, setUsernameVal] = useState(admin?.username || '');
+  const [usernameSaving, setUsernameSaving] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState(null); // { ok, msg }
+
+  /* ── Password form state ── */
+  const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
+  const [showPw, setShowPw] = useState({ current: false, newPw: false, confirm: false });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwStatus, setPwStatus] = useState(null); // { ok, msg }
+
+  const setPwField = (k) => (e) => setPwForm(f => ({ ...f, [k]: e.target.value }));
+  const toggleShow = (k) => setShowPw(f => ({ ...f, [k]: !f[k] }));
+
+  /* ── Save username ── */
+  const handleSaveUsername = async (e) => {
+    e.preventDefault();
+    if (!usernameVal.trim() || usernameVal.trim() === admin?.username) return;
+    setUsernameSaving(true); setUsernameStatus(null);
+    const result = await updateAdmin({ username: usernameVal.trim() });
+    setUsernameSaving(false);
+    setUsernameStatus({ ok: result.success, msg: result.message });
+    if (result.success) showToast('Username updated!');
+  };
+
+  /* ── Save password ── */
+  const handleSavePassword = async (e) => {
+    e.preventDefault();
+    if (!pwForm.current || !pwForm.newPw || !pwForm.confirm) return;
+    if (pwForm.newPw !== pwForm.confirm) {
+      setPwStatus({ ok: false, msg: 'New passwords do not match' });
+      return;
+    }
+    if (pwForm.newPw.length < 6) {
+      setPwStatus({ ok: false, msg: 'New password must be at least 6 characters' });
+      return;
+    }
+    setPwSaving(true); setPwStatus(null);
+    const result = await updateAdmin({ currentPassword: pwForm.current, newPassword: pwForm.newPw });
+    setPwSaving(false);
+    setPwStatus({ ok: result.success, msg: result.message });
+    if (result.success) {
+      setPwForm({ current: '', newPw: '', confirm: '' });
+      showToast('Password updated!');
+    }
+  };
+
+  const pwStrength = (pw) => {
+    if (!pw) return null;
+    if (pw.length < 6) return { level: 0, label: 'Too short', color: '#ef4444' };
+    if (pw.length < 8) return { level: 1, label: 'Weak', color: '#f59e0b' };
+    if (/[A-Z]/.test(pw) && /[0-9]/.test(pw)) return { level: 3, label: 'Strong', color: '#10b981' };
+    return { level: 2, label: 'Moderate', color: '#06b6d4' };
+  };
+  const strength = pwStrength(pwForm.newPw);
+
+  return (
+    <div className="dash-main">
+      <div className="dash-header">
+        <div className="dash-header__left">
+          <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+            <path d={ICONS_S.settings} stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <h1>Settings</h1>
+        </div>
+      </div>
+      <div className="dash-body">
+        <div className="settings-grid">
+
+          {/* ── LEFT COLUMN: Account info + forms ── */}
+          <div style={{display:'flex', flexDirection:'column', gap:'16px'}}>
+
+            {/* Account info card */}
+            <div className="settings-section">
+              <h3>Account Info</h3>
+              <div className="settings-field">
+                <label>Current Username</label>
+                <div className="settings-value" style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                  <span style={{fontSize:'1rem'}}>👑</span>
+                  <strong>{admin?.username}</strong>
+                </div>
+              </div>
+              <div className="settings-field">
+                <label>Email</label>
+                <div className="settings-value">{admin?.email}</div>
+              </div>
+            </div>
+
+            {/* ── Change Username ── */}
+            <div className="settings-section">
+              <h3 style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                  <circle cx="9" cy="6" r="3" stroke="#a855f7" strokeWidth="1.6"/>
+                  <path d="M2 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#a855f7" strokeWidth="1.6" strokeLinecap="round"/>
+                </svg>
+                Change Username
+              </h3>
+              <form onSubmit={handleSaveUsername} style={{display:'flex', flexDirection:'column', gap:'12px'}}>
+                <div className="settings-field" style={{gap:'8px', flexDirection:'column', alignItems:'stretch'}}>
+                  <label>New Username</label>
+                  <div style={{position:'relative'}}>
+                    <input
+                      className="settings-input"
+                      type="text"
+                      value={usernameVal}
+                      onChange={e => { setUsernameVal(e.target.value); setUsernameStatus(null); }}
+                      placeholder="Enter new username"
+                      minLength={3}
+                      maxLength={32}
+                      pattern="[a-zA-Z0-9_\-]+"
+                      title="Alphanumeric, underscores, and hyphens only"
+                      id="settings-username-input"
+                    />
+                  </div>
+                  <p style={{fontSize:'0.73rem', color:'#475569', marginTop:'-4px'}}>
+                    Alphanumeric, underscores, and hyphens only. Your kingdom URL will change.
+                  </p>
+                </div>
+                {usernameStatus && (
+                  <div className={`settings-status ${usernameStatus.ok ? 'settings-status--ok' : 'settings-status--err'}`}>
+                    <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
+                      <path d={usernameStatus.ok ? ICONS_S.check : 'M5 5l8 8M13 5l-8 8'} stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    {usernameStatus.msg}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  className="dash-btn dash-btn--primary"
+                  disabled={usernameSaving || !usernameVal.trim() || usernameVal.trim() === admin?.username}
+                  id="settings-save-username"
+                  style={{alignSelf:'flex-start'}}
+                >
+                  {usernameSaving ? <><span className="dash-spinner dash-spinner--sm"/> Saving…</> : 'Save Username'}
+                </button>
+              </form>
+            </div>
+
+            {/* ── Change Password ── */}
+            <div className="settings-section">
+              <h3 style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                  <path d={ICONS_S.lock} stroke="#a855f7" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Change Password
+              </h3>
+              <form onSubmit={handleSavePassword} style={{display:'flex', flexDirection:'column', gap:'14px'}}>
+
+                {/* Current Password */}
+                <div className="settings-field" style={{flexDirection:'column', alignItems:'stretch', gap:'7px'}}>
+                  <label>Current Password</label>
+                  <div className="settings-pw-wrap">
+                    <input
+                      className="settings-input settings-input--pw"
+                      type={showPw.current ? 'text' : 'password'}
+                      value={pwForm.current}
+                      onChange={setPwField('current')}
+                      placeholder="Enter your current password"
+                      autoComplete="current-password"
+                      id="settings-current-pw"
+                    />
+                    <button type="button" className="settings-eye-btn" onClick={() => toggleShow('current')} tabIndex={-1}>
+                      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                        <path d={showPw.current ? ICONS_S.eyeOff : ICONS_S.eye} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* New Password */}
+                <div className="settings-field" style={{flexDirection:'column', alignItems:'stretch', gap:'7px'}}>
+                  <label>New Password</label>
+                  <div className="settings-pw-wrap">
+                    <input
+                      className="settings-input settings-input--pw"
+                      type={showPw.newPw ? 'text' : 'password'}
+                      value={pwForm.newPw}
+                      onChange={e => { setPwField('newPw')(e); setPwStatus(null); }}
+                      placeholder="Min. 6 characters"
+                      autoComplete="new-password"
+                      id="settings-new-pw"
+                    />
+                    <button type="button" className="settings-eye-btn" onClick={() => toggleShow('newPw')} tabIndex={-1}>
+                      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                        <path d={showPw.newPw ? ICONS_S.eyeOff : ICONS_S.eye} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Strength bar */}
+                  {pwForm.newPw && strength && (
+                    <div style={{display:'flex', flexDirection:'column', gap:'5px'}}>
+                      <div style={{height:'3px', borderRadius:'100px', background:'rgba(255,255,255,0.07)', overflow:'hidden'}}>
+                        <div style={{width:`${(strength.level/3)*100}%`, height:'100%', background:strength.color, transition:'width 0.3s, background 0.3s'}}/>
+                      </div>
+                      <span style={{fontSize:'0.72rem', color:strength.color, fontWeight:'600'}}>{strength.label}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="settings-field" style={{flexDirection:'column', alignItems:'stretch', gap:'7px'}}>
+                  <label>Confirm New Password</label>
+                  <div className="settings-pw-wrap">
+                    <input
+                      className="settings-input settings-input--pw"
+                      type={showPw.confirm ? 'text' : 'password'}
+                      value={pwForm.confirm}
+                      onChange={setPwField('confirm')}
+                      placeholder="Repeat new password"
+                      autoComplete="new-password"
+                      id="settings-confirm-pw"
+                    />
+                    <button type="button" className="settings-eye-btn" onClick={() => toggleShow('confirm')} tabIndex={-1}>
+                      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                        <path d={showPw.confirm ? ICONS_S.eyeOff : ICONS_S.eye} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Match indicator */}
+                  {pwForm.confirm && (
+                    <span style={{fontSize:'0.72rem', fontWeight:'600', color: pwForm.newPw === pwForm.confirm ? '#10b981' : '#ef4444'}}>
+                      {pwForm.newPw === pwForm.confirm ? '✓ Passwords match' : '✗ Passwords do not match'}
+                    </span>
+                  )}
+                </div>
+
+                {pwStatus && (
+                  <div className={`settings-status ${pwStatus.ok ? 'settings-status--ok' : 'settings-status--err'}`}>
+                    <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
+                      <path d={pwStatus.ok ? ICONS_S.check : 'M5 5l8 8M13 5l-8 8'} stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    {pwStatus.msg}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="dash-btn dash-btn--primary"
+                  disabled={pwSaving || !pwForm.current || !pwForm.newPw || !pwForm.confirm}
+                  id="settings-save-password"
+                  style={{alignSelf:'flex-start'}}
+                >
+                  {pwSaving ? <><span className="dash-spinner dash-spinner--sm"/> Saving…</> : '🔐 Update Password'}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* ── RIGHT COLUMN: Danger zone ── */}
+          <div className="settings-section settings-section--danger">
+            <h3>Danger Zone</h3>
+            <p className="settings-danger-note">These actions are irreversible. Proceed with caution.</p>
+            <button className="dash-btn dash-btn--danger" onClick={handleLogout} id="settings-signout-btn">
+              <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
+                <path d="M11 3H6a2 2 0 00-2 2v8a2 2 0 002 2h5M14 9H7m0 0l3-3m-3 3l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Sign Out
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <style>{`
+        .settings-input {
+          width: 100%;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 10px;
+          color: #f8fafc;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          padding: 11px 14px;
+          transition: border-color 0.2s ease;
+        }
+        .settings-input:focus {
+          outline: none;
+          border-color: rgba(168,85,247,0.6);
+          box-shadow: 0 0 0 3px rgba(168,85,247,0.1);
+        }
+        .settings-input::placeholder { color: #475569; }
+        .settings-input--pw { padding-right: 42px; }
+
+        .settings-pw-wrap {
+          position: relative;
+          display: flex; align-items: center;
+        }
+        .settings-pw-wrap .settings-input { flex: 1; }
+        .settings-eye-btn {
+          position: absolute; right: 12px;
+          background: none; border: none;
+          color: #475569; cursor: pointer; padding: 4px;
+          display: flex; align-items: center;
+          transition: color 0.2s ease;
+        }
+        .settings-eye-btn:hover { color: #94a3b8; }
+
+        .settings-status {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 0.82rem; font-weight: 600;
+          padding: 9px 13px; border-radius: 8px;
+        }
+        .settings-status--ok {
+          background: rgba(16,185,129,0.1);
+          border: 1px solid rgba(16,185,129,0.25);
+          color: #10b981;
+        }
+        .settings-status--err {
+          background: rgba(239,68,68,0.1);
+          border: 1px solid rgba(239,68,68,0.25);
+          color: #ef4444;
+        }
+        .settings-section--danger {
+          align-self: flex-start;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
    MAIN DASHBOARD
    ════════════════════════════════════════════ */
 export default function Dashboard() {
-  const { admin, logout } = useAuth();
+  const { admin, logout, updateAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [activeNav, setActiveNav] = useState('links');
@@ -236,7 +570,7 @@ export default function Dashboard() {
   const [links, setLinks] = useState([]);
   const [linksLoading, setLinksLoading] = useState(true);
 
-  const [form, setForm] = useState({ title: '', url: '' });
+  const [form, setForm] = useState({ title: '', url: '', description: '', category: 'General' });
   const [linkType, setLinkType] = useState('url'); // 'url' | 'file' | 'snippet'
   const [snippetContent, setSnippetContent] = useState('');
   const [editingLink, setEditingLink] = useState(null);
@@ -283,7 +617,7 @@ export default function Dashboard() {
   const updateActionUrl = (idx, val) => setActions(prev => prev.map((a, i) => i === idx ? { ...a, actionUrl: val } : a));
 
   const resetForm = () => {
-    setForm({ title: '', url: '' });
+    setForm({ title: '', url: '', description: '', category: 'General' });
     setLinkType('url');
     setSnippetContent('');
     setEditingLink(null);
@@ -309,6 +643,8 @@ export default function Dashboard() {
       linkType,
       url: linkType === 'snippet' ? '' : url,
       content: linkType === 'snippet' ? snippetContent.trim() : '',
+      description: form.description.trim(),
+      category: form.category || 'General',
       actions: actions.map(a => ({
         type: a.type,
         label: a.label,
@@ -369,7 +705,7 @@ export default function Dashboard() {
   /* ── Open edit ── */
   const handleEdit = (link) => {
     setEditingLink(link);
-    setForm({ title: link.title || '', url: link.url || '' });
+    setForm({ title: link.title || '', url: link.url || '', description: link.description || '', category: link.category || 'General' });
     setLinkType(link.linkType || 'url');
     setSnippetContent(link.content || '');
     setActions((link.actions || []).map(a => ({ ...a, actionUrl: a.url })));
@@ -583,6 +919,57 @@ export default function Dashboard() {
                     required
                     id="create-title-input"
                   />
+                </div>
+
+                {/* ── CATEGORY + DESCRIPTION ── */}
+                <div className="cf-row-two">
+                  <div className="cf-group cf-group--half">
+                    <label className="cf-label">
+                      <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                        <path d="M3 5h12M3 9h8M3 13h5" stroke="#a855f7" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                      Category
+                    </label>
+                    <select
+                      className="cf-input cf-select"
+                      value={form.category}
+                      onChange={setField('category')}
+                      id="create-category-select"
+                    >
+                      <option value="General">General</option>
+                      <option value="Programming">Programming</option>
+                      <option value="Education">Education</option>
+                      <option value="Business">Business</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Design">Design</option>
+                      <option value="Gaming">Gaming</option>
+                      <option value="Music">Music</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Health">Health</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Entertainment">Entertainment</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="cf-group">
+                  <label className="cf-label">
+                    <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                      <path d="M3 4h12v10H3z" stroke="#a855f7" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 7h6M6 10h4" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Resource Description
+                    <span style={{color:'#64748b', fontWeight:'400', marginLeft:'6px', fontSize:'0.78rem'}}>(Improves visibility)</span>
+                  </label>
+                  <textarea
+                    className="cf-textarea cf-textarea--sm"
+                    placeholder="Briefly describe what visitors will find after completing the actions. E.g. 'This resource contains React.js learning materials and useful references for beginners.'"
+                    value={form.description}
+                    onChange={setField('description')}
+                    rows={3}
+                    id="create-description-textarea"
+                  />
+                  <p className="cf-hint">A clear description improves AdSense eligibility and helps visitors understand what they're unlocking.</p>
                 </div>
 
                 {/* ── ACTIONS SECTION ── */}
@@ -916,43 +1303,7 @@ export default function Dashboard() {
     </div>
   );
 
-  const renderSettings = () => (
-    <div className="dash-main">
-      <div className="dash-header">
-        <div className="dash-header__left">
-          <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-            <path d={ICONS.settings} stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <h1>Settings</h1>
-        </div>
-      </div>
-      <div className="dash-body">
-        <div className="settings-grid">
-          <div className="settings-section">
-            <h3>Account</h3>
-            <div className="settings-field">
-              <label>Username</label>
-              <div className="settings-value">{admin?.username}</div>
-            </div>
-            <div className="settings-field">
-              <label>Email</label>
-              <div className="settings-value">{admin?.email}</div>
-            </div>
-          </div>
-          <div className="settings-section">
-            <h3>Danger Zone</h3>
-            <p className="settings-danger-note">These actions are irreversible.</p>
-            <button className="dash-btn dash-btn--danger" onClick={handleLogout}>
-              <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
-                <path d={ICONS.logout} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const renderSettings = () => <SettingsPanel admin={admin} updateAdmin={updateAdmin} showToast={showToast} handleLogout={handleLogout} />;
 
   const renderContent = () => {
     switch (activeNav) {
@@ -1607,7 +1958,7 @@ export default function Dashboard() {
         .bio-actions { display: flex; gap: 12px; }
 
         /* ── Settings ── */
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 700px; }
+        .settings-grid { display: grid; grid-template-columns: 1fr 300px; gap: 24px; max-width: 980px; align-items: flex-start; }
         .settings-section { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 24px; }
         .settings-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: #f8fafc; }
         .settings-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
@@ -1855,6 +2206,32 @@ export default function Dashboard() {
           margin-bottom: 8px;
         }
         .preview-progress__text--green { color: #10b981 !important; font-weight: 600; }
+
+        /* ── New form element styles ── */
+        .cf-select {
+          appearance: none;
+          background: rgba(255,255,255,0.04) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+          cursor: pointer;
+        }
+        .cf-select:focus { border-color: rgba(168,85,247,0.6); box-shadow: 0 0 0 3px rgba(168,85,247,0.1); }
+        .cf-textarea {
+          width: 100%;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+          color: #f8fafc;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          padding: 12px 14px;
+          resize: vertical;
+          transition: border-color 0.2s ease;
+          line-height: 1.6;
+        }
+        .cf-textarea:focus { outline: none; border-color: rgba(168,85,247,0.6); box-shadow: 0 0 0 3px rgba(168,85,247,0.1); }
+        .cf-textarea::placeholder { color: #475569; }
+        .cf-textarea--sm { font-size: 0.82rem; padding: 10px 12px; }
+        .cf-row-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .cf-group--half { }
 
         @media (max-width: 1024px) {
           .stats-row { grid-template-columns: repeat(2, 1fr); }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import '../../index.css';
@@ -120,6 +120,22 @@ function PricingCard({ plan, price, period, features, cta, highlight, delay }) {
       <Link to="/admin/login" className={`pricing-cta ${highlight ? 'pricing-cta--primary' : 'pricing-cta--ghost'}`}>
         {cta}
       </Link>
+    </div>
+  );
+}
+
+/* ── FAQ Item ── */
+function FaqItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`faq-item ${open ? 'faq-item--open' : ''}`} onClick={() => setOpen(!open)}>
+      <div className="faq-question">
+        <span>{q}</span>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="faq-chevron">
+          <path d="M4 7l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      {open && <p className="faq-answer">{a}</p>}
     </div>
   );
 }
@@ -497,6 +513,96 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ══ FEATURED CREATORS ══ */}
+      <section id="creators" className="section reveal">
+        <div className="container">
+          <div className="section-header">
+            <span className="section-eyebrow">Community Spotlight</span>
+            <h2 className="section-title">Featured <span className="gradient-text">Creators</span></h2>
+            <p className="section-subtitle">Discover the builders and creators ruling their kingdoms</p>
+          </div>
+          <div className="creators-grid">
+            {[
+              { avatar: '🧑‍💻', name: 'DevMaster Pro', category: 'Programming', links: 24, clicks: '18.4K', desc: 'Full-stack developer sharing React, Node.js tutorials and curated dev resources.' },
+              { avatar: '🎨', name: 'DesignKing', category: 'Design', links: 18, clicks: '12.7K', desc: 'UI/UX designer publishing Figma templates, design systems, and creative inspiration.' },
+              { avatar: '📈', name: 'GrowthHacker', category: 'Marketing', links: 31, clicks: '29.1K', desc: 'Digital marketer sharing proven growth strategies, SEO guides, and ad campaigns.' },
+              { avatar: '🎓', name: 'EduVault', category: 'Education', links: 45, clicks: '41.2K', desc: 'Educator curating free learning resources, e-books, and online course discounts.' },
+              { avatar: '🎵', name: 'BeatMaker', category: 'Music', links: 12, clicks: '8.9K', desc: 'Music producer sharing beats, sample packs, and production tutorials for free.' },
+              { avatar: '💹', name: 'FinanceKing', category: 'Finance', links: 22, clicks: '33.5K', desc: 'Finance expert sharing investment guides, crypto analysis, and trading signals.' },
+            ].map((c, i) => (
+              <div key={i} className="creator-card">
+                <div className="creator-card__header">
+                  <div className="creator-avatar">{c.avatar}</div>
+                  <div>
+                    <p className="creator-name">{c.name}</p>
+                    <span className="creator-badge">{c.category}</span>
+                  </div>
+                </div>
+                <p className="creator-desc">{c.desc}</p>
+                <div className="creator-stats">
+                  <span>🔗 {c.links} links</span>
+                  <span>👁️ {c.clicks} clicks</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ LATEST RESOURCES ══ */}
+      <section id="resources" className="section section--dark reveal">
+        <div className="container">
+          <div className="section-header">
+            <span className="section-eyebrow">Fresh Content</span>
+            <h2 className="section-title">Popular <span className="gradient-text">Resources</span></h2>
+            <p className="section-subtitle">High-quality content shared by our creator community</p>
+          </div>
+          <div className="resources-grid">
+            {[
+              { icon: '⚛️', title: 'React 19 Complete Guide', author: 'DevMaster Pro', category: 'Programming', desc: 'A comprehensive guide to React 19 features including Server Components, new hooks, and performance improvements.' },
+              { icon: '🎨', title: 'Figma Design System Kit', author: 'DesignKing', category: 'Design', desc: 'Production-ready Figma design system with 200+ components, color palettes, and typography guidelines.' },
+              { icon: '📊', title: 'SEO Masterclass 2026', author: 'GrowthHacker', category: 'Marketing', desc: 'Step-by-step SEO strategies for ranking #1 on Google. Covers technical SEO, content, and link building.' },
+              { icon: '🤖', title: 'AI Tools for Creators', author: 'EduVault', category: 'Education', desc: 'Curated list of 50+ AI tools for writers, designers, marketers, and developers with detailed reviews.' },
+              { icon: '🎵', title: 'Lo-fi Sample Pack Vol. 3', author: 'BeatMaker', category: 'Music', desc: 'Free 200MB lo-fi sample pack with 80 unique loops, one-shots, and atmospheres for music production.' },
+              { icon: '💎', title: 'Crypto Portfolio Strategy', author: 'FinanceKing', category: 'Finance', desc: 'Proven portfolio allocation strategies for crypto investors with risk management techniques for 2026.' },
+            ].map((r, i) => (
+              <div key={i} className="resource-card">
+                <div className="resource-icon">{r.icon}</div>
+                <div className="resource-info">
+                  <span className="resource-cat">{r.category}</span>
+                  <h3 className="resource-title">{r.title}</h3>
+                  <p className="resource-desc">{r.desc}</p>
+                  <p className="resource-author">by {r.author}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ FAQ ══ */}
+      <section id="faq" className="section reveal">
+        <div className="container">
+          <div className="section-header">
+            <span className="section-eyebrow">Got Questions?</span>
+            <h2 className="section-title">Frequently Asked <span className="gradient-text">Questions</span></h2>
+          </div>
+          <div className="faq-list">
+            {[
+              { q: 'What is MyKingdoms?', a: 'MyKingdoms is a link-in-bio and content monetization platform that helps creators share their content through a single, powerful link. Creators can gate their resources behind social actions — such as following on YouTube or Instagram — and unlock them for visitors who complete those actions.' },
+              { q: 'How does the link gating system work?', a: 'Creators add "actions" to their links (e.g., Subscribe on YouTube, Follow on Instagram). Visitors must complete all actions to unlock the destination resource. Each action has a 10-second verification timer to ensure genuine engagement.' },
+              { q: 'What types of content can I share?', a: 'You can share URLs (any web link), downloadable files (PDFs, images, software), or text snippets (coupon codes, passwords, API keys, code snippets). All content types support gating with social actions.' },
+              { q: 'Is MyKingdoms free to use?', a: 'Yes! MyKingdoms offers a generous free plan (Squire) with 5 links and basic analytics. Paid plans (Knight at $9/mo and King at $29/mo) unlock unlimited links, advanced analytics, custom domains, and premium themes.' },
+              { q: 'How do I get started?', a: 'Simply click "Get Started" or "Create My First Link", create an account, and you\'ll be in your dashboard within seconds. No credit card required for the free plan. You can create your first link in under 2 minutes.' },
+              { q: 'Can I use my own domain?', a: 'Yes! Custom domain support is available on the Knight and King plans. You can connect any domain you own and serve your kingdom page from it for a fully branded experience.' },
+              { q: 'Is my content safe on MyKingdoms?', a: 'Absolutely. We use industry-standard encryption, secure MongoDB storage, and JWT authentication. Your content and user data are never sold to third parties. Read our Privacy Policy for full details.' },
+            ].map((item, i) => (
+              <FaqItem key={i} q={item.q} a={item.a} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ══ CTA BANNER ══ */}
       <section className="cta-banner reveal">
         <div className="cta-banner__blob" aria-hidden="true" />
@@ -545,29 +651,29 @@ export default function Home() {
               <li><a href="#features">Features</a></li>
               <li><a href="#pricing">Pricing</a></li>
               <li><a href="#how-it-works">How it Works</a></li>
-              <li><a href="#hero">Templates</a></li>
+              <li><a href="#faq">FAQ</a></li>
             </ul>
           </div>
           <div className="footer__links-col">
             <h4>Company</h4>
             <ul>
-              <li><a href="#hero">About</a></li>
-              <li><a href="#hero">Blog</a></li>
-              <li><a href="#hero">Careers</a></li>
-              <li><a href="#hero">Press</a></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><a href="#creators">Featured Creators</a></li>
+              <li><a href="#resources">Resources</a></li>
+              <li><Link to="/contact">Contact</Link></li>
             </ul>
           </div>
           <div className="footer__links-col">
             <h4>Legal</h4>
             <ul>
-              <li><a href="#hero">Privacy Policy</a></li>
-              <li><a href="#hero">Terms of Service</a></li>
-              <li><a href="#hero">Cookie Policy</a></li>
+              <li><Link to="/privacy">Privacy Policy</Link></li>
+              <li><Link to="/terms">Terms of Service</Link></li>
+              <li><Link to="/contact">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
         <div className="footer__bottom container">
-          <p>© 2025 MyKingdoms. All rights reserved. Built with ❤️ for creators.</p>
+          <p>© 2026 MyKingdoms. All rights reserved. Built with ❤️ for creators.</p>
           <p>Made with 💜 by the MyKingdoms team</p>
         </div>
       </footer>
@@ -1420,6 +1526,8 @@ export default function Home() {
           .pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; }
           .pricing-card--highlight { transform: none; }
           .pricing-card--highlight:hover { transform: translateY(-6px); }
+          .creators-grid { grid-template-columns: repeat(2, 1fr); }
+          .resources-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
           .hero { padding: 100px 0 40px; }
@@ -1428,6 +1536,8 @@ export default function Home() {
           .features-grid { grid-template-columns: 1fr; }
           .testimonials-grid { grid-template-columns: 1fr; }
           .steps-grid { grid-template-columns: 1fr; }
+          .creators-grid { grid-template-columns: 1fr 1fr; }
+          .resources-grid { grid-template-columns: 1fr; }
           .footer__inner { grid-template-columns: 1fr 1fr; gap: 32px; }
           .footer__brand { grid-column: 1 / -1; }
           .footer__bottom { flex-direction: column; gap: 8px; text-align: center; }
@@ -1438,6 +1548,113 @@ export default function Home() {
           .cta-btn { width: 100%; justify-content: center; max-width: 320px; }
           .footer__inner { grid-template-columns: 1fr; }
         }
+        /* ===== CREATOR CARDS ===== */
+        .creators-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+        .creator-card {
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-md);
+          padding: 20px;
+          display: flex; flex-direction: column; gap: 12px;
+          transition: all var(--transition);
+          animation: fadeInUp 0.5s ease both;
+        }
+        .creator-card:hover {
+          border-color: rgba(168,85,247,0.3);
+          transform: translateY(-4px);
+          background: var(--bg-card-hover);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .creator-card__header { display: flex; align-items: center; gap: 12px; }
+        .creator-avatar {
+          width: 48px; height: 48px; border-radius: 50%;
+          background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(245,158,11,0.15));
+          border: 2px solid rgba(124,58,237,0.3);
+          display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+          flex-shrink: 0;
+        }
+        .creator-name { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px; }
+        .creator-badge {
+          display: inline-block;
+          background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25);
+          color: #c4b5fd; font-size: 0.7rem; font-weight: 700;
+          padding: 2px 8px; border-radius: 100px;
+        }
+        .creator-desc { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; flex: 1; }
+        .creator-stats {
+          display: flex; gap: 16px;
+          font-size: 0.78rem; color: var(--text-muted);
+          border-top: 1px solid rgba(255,255,255,0.04);
+          padding-top: 12px;
+        }
+
+        /* ===== RESOURCE CARDS ===== */
+        .resources-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+        .resource-card {
+          display: flex; align-items: flex-start; gap: 16px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: var(--radius-md);
+          padding: 18px 20px;
+          transition: all var(--transition);
+          animation: fadeInUp 0.5s ease both;
+        }
+        .resource-card:hover {
+          border-color: rgba(168,85,247,0.2);
+          background: rgba(255,255,255,0.05);
+          transform: translateY(-2px);
+        }
+        .resource-icon {
+          font-size: 1.8rem; flex-shrink: 0;
+          width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+          background: rgba(124,58,237,0.1); border-radius: 12px;
+        }
+        .resource-info { flex: 1; }
+        .resource-cat {
+          font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+          color: #a855f7; display: block; margin-bottom: 4px;
+        }
+        .resource-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .resource-desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 8px; }
+        .resource-author { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* ===== FAQ ===== */
+        .faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 800px; margin: 0 auto; }
+        .faq-item {
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-sm);
+          overflow: hidden; cursor: pointer;
+          transition: border-color var(--transition);
+        }
+        .faq-item:hover, .faq-item--open { border-color: rgba(168,85,247,0.4); }
+        .faq-question {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 18px 20px;
+          font-size: 0.95rem; font-weight: 600; color: var(--text-primary);
+          gap: 12px;
+        }
+        .faq-chevron {
+          color: #64748b; flex-shrink: 0;
+          transition: transform 0.3s ease;
+        }
+        .faq-item--open .faq-chevron { transform: rotate(180deg); color: #a855f7; }
+        .faq-answer {
+          padding: 0 20px 18px;
+          font-size: 0.875rem; color: var(--text-secondary);
+          line-height: 1.7; border-top: 1px solid rgba(255,255,255,0.04);
+          padding-top: 14px;
+          animation: fadeInUp 0.25s ease;
+        }
+
       `}</style>
     </div>
   );

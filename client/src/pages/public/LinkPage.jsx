@@ -234,14 +234,69 @@ export default function LinkPage() {
         <div className="lp-card">
           {/* Link title */}
           <h1 className="lp-card-title">{link.title}</h1>
+
+          {/* Rich metadata row — AdSense content enrichment */}
+          <div className="lp-meta-row">
+            {link.category && link.category !== 'General' && (
+              <span className="lp-meta-badge">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h7M1 9h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                {link.category}
+              </span>
+            )}
+            {link.owner?.username && (
+              <span className="lp-meta-item">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="currentColor" strokeWidth="1.4"/><path d="M1 11c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                {link.owner.username}
+              </span>
+            )}
+            {link.updatedAt && (
+              <span className="lp-meta-item">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.4"/><path d="M6 3.5V6l2 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                {new Date(link.updatedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </span>
+            )}
+          </div>
+
+          {/* Resource description */}
+          {link.description ? (
+            <div className="lp-description-block">
+              <p className="lp-description-text">{link.description}</p>
+            </div>
+          ) : (
+            <div className="lp-description-block lp-description-block--default">
+              <p className="lp-description-text">
+                This page provides access to exclusive content shared by the creator. Complete the required actions below to unlock the resource. Your support helps creators continue producing quality content.
+              </p>
+            </div>
+          )}
+
+          {/* How it works mini section */}
+          <div className="lp-howto">
+            <p className="lp-howto-title">How to unlock this resource</p>
+            <div className="lp-howto-steps">
+              <div className="lp-howto-step">
+                <span className="lp-howto-num">1</span>
+                <span>Complete each action button below</span>
+              </div>
+              <div className="lp-howto-step">
+                <span className="lp-howto-num">2</span>
+                <span>Wait for the countdown to finish</span>
+              </div>
+              <div className="lp-howto-step">
+                <span className="lp-howto-num">3</span>
+                <span>Click the unlock button to access</span>
+              </div>
+            </div>
+          </div>
+
           <p className="lp-card-sub">
             {unlocked
               ? (link.linkType === 'snippet' ? '📋 Snippet unlocked! Scroll down to see it.' :
                 link.linkType === 'file' ? '🎉 File unlocked! Click below to download.' :
                   '🎉 Link unlocked! Click below to visit.')
-              : (link.linkType === 'file' ? 'Complete the actions to download the file' :
-                link.linkType === 'snippet' ? 'Complete the actions to reveal the snippet' :
-                  'Complete the actions to unlock')}
+              : (link.linkType === 'file' ? 'Complete the actions below to download the file' :
+                link.linkType === 'snippet' ? 'Complete the actions below to reveal the snippet' :
+                  'Complete the actions below to unlock access')}
           </p>
 
           {/* Action buttons */}
@@ -722,6 +777,59 @@ export default function LinkPage() {
           cursor: pointer;
         }
         .lp-download-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(6,182,212,0.6) !important; }
+
+        /* Metadata row */
+        .lp-meta-row {
+          display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+          margin-top: -12px; justify-content: center;
+        }
+        .lp-meta-badge {
+          display: inline-flex; align-items: center; gap: 5px;
+          background: rgba(168,85,247,0.15);
+          border: 1px solid rgba(168,85,247,0.3);
+          color: #c4b5fd; font-size: 0.75rem; font-weight: 700;
+          padding: 4px 10px; border-radius: 100px;
+          letter-spacing: 0.3px;
+        }
+        .lp-meta-item {
+          display: inline-flex; align-items: center; gap: 5px;
+          color: #475569; font-size: 0.75rem; font-weight: 500;
+        }
+
+        /* Description block */
+        .lp-description-block {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-left: 3px solid rgba(168,85,247,0.5);
+          border-radius: 10px; padding: 14px 16px;
+        }
+        .lp-description-block--default { border-left-color: rgba(100,116,139,0.4); }
+        .lp-description-text {
+          font-size: 0.875rem; color: #94a3b8; line-height: 1.65;
+          margin: 0;
+        }
+
+        /* How-to section */
+        .lp-howto {
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 12px; padding: 14px 16px;
+        }
+        .lp-howto-title {
+          font-size: 0.72rem; font-weight: 800; color: #475569;
+          text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px;
+        }
+        .lp-howto-steps { display: flex; flex-direction: column; gap: 8px; }
+        .lp-howto-step {
+          display: flex; align-items: center; gap: 10px;
+          font-size: 0.82rem; color: #64748b;
+        }
+        .lp-howto-num {
+          width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+          background: linear-gradient(135deg, #7c3aed, #a855f7);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.7rem; font-weight: 800; color: #fff;
+        }
 
         @media (max-width: 480px) {
           .lp-card { padding: 24px 20px; }

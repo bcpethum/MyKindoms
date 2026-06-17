@@ -11,7 +11,7 @@ export const getLinks = async (req, res) => {
 
 export const getLinkById = async (req, res) => {
   try {
-    const link = await Link.findById(req.params.id);
+    const link = await Link.findById(req.params.id).populate('owner', 'username');
     if (!link) return res.status(404).json({ success: false, message: 'Link not found' });
     res.status(200).json({ success: true, link });
   } catch (error) {
@@ -26,6 +26,8 @@ export const createLink = async (req, res) => {
       linkType,
       url,
       content,
+      description,
+      category,
       icon,
       order,
       actions
@@ -36,6 +38,8 @@ export const createLink = async (req, res) => {
       linkType: linkType || 'url',
       url: url || '',
       content: content || '',
+      description: description || '',
+      category: category || 'General',
       icon,
       order,
       actions,

@@ -17,6 +17,8 @@ const linkSchema = new mongoose.Schema(
     linkType: { type: String, enum: ['url', 'file', 'snippet'], default: 'url' },
     url: { type: String, default: '' },
     content: { type: String, default: '' }, // for snippet type
+    description: { type: String, default: '' }, // AdSense: publisher-created content
+    category: { type: String, default: 'General' }, // e.g. Programming, Education, Business
     clicks: {
       type: Number,
       default: 0

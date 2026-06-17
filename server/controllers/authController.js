@@ -160,3 +160,55 @@ export const getCurrentAdmin = async (
     });
   }
 };
+
+// Update Admin (username / password)
+export const updateAdmin = async (req, res) => {
+  try {
+    const { username, currentPassword, newPassword } = req.body;
+
+    const admin = await Admin.findById(req.user.id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    // ── Update username ─────────────────────────────
+    if (username && username.trim() !== admin.username) {
+      const taken = await Admin.findOne({ username: username.trim() });
+      if (taken) {
+        return res.status(400).json({ success: false, message: "Username already taken" });
+      }
+      admin.username = username.trim();
+    }
+
+    // ── Update password ─────────────────────────────
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: "Current password is required to set a new password" });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, admin.password);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: "Current password is incorrect" });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      admin.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Account updated successfully",
+      admin: {
+        id: admin._id,
+        username: admin.username,
+        email: admin.email,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
