@@ -202,6 +202,17 @@ function LinkRow({ link, onEdit, onDelete, onToggle, onCopy }) {
           <input type="checkbox" checked={link.active} onChange={() => onToggle(link)} />
           <span className="toggle-track" />
         </label>
+        <a
+          className="icon-btn"
+          href={`${window.location.origin}/link/${link._id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open Link"
+        >
+          <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
+            <path d={ICONS.external} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </a>
         <button className="icon-btn" onClick={() => onCopy(`${window.location.origin}/link/${link._id}`)} title="Copy Page URL">
           <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
             <path d={ICONS.copy} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
